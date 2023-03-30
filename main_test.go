@@ -28,6 +28,7 @@ func BenchmarkFindLongestGroup(b *testing.B) {
 	height, width, colorsCount := 100, 100, 10
 	matrix := newMatrix(height, width, colorsCount)
 
+	b.ResetTimer()
 	for n := 0; n < b.N; n++ {
 		findLongestGroup(matrix)
 	}
