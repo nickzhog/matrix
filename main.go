@@ -37,19 +37,14 @@ func main() {
 		fmt.Println()
 	}
 
-	longestGroup, gtype := findLongestGroup(matrix)
-	fmt.Printf("Наибольшее количество одинаковых цветов подряд: %s %d, цвет: %d \n",
-		gtype, len(longestGroup), longestGroup[0].color)
+	longestGroup := findLongestGroup(matrix)
+	fmt.Printf("Наибольшее количество одинаковых цветов подряд: %d, цвет: %d \n",
+		len(longestGroup), longestGroup[0].color)
 }
 
 type block struct {
 	color int
 }
-
-const (
-	TypeHorizontal = "горизонтально"
-	TypeVertical   = "вертикально"
-)
 
 func newMatrix(height, width, colorsCount int) [][]block {
 	matrix := make([][]block, height)
@@ -66,49 +61,63 @@ func newMatrix(height, width, colorsCount int) [][]block {
 	return matrix
 }
 
-func findLongestGroup(matrix [][]block) ([]block, string) {
-	var longestGroup []block
-	var groupType string
+type point struct {
+	row int
+	col int
+}
 
-	// Проверка горизонтальных групп
+func findLongestGroup(matrix [][]block) []block {
+	visited := make(map[point]bool)
+	longestGroup := make([]block, 0)
+
 	for i := range matrix {
-		currentGroup := make([]block, 0)
 		for j := range matrix[i] {
-			if len(currentGroup) == 0 || currentGroup[len(currentGroup)-1].color == matrix[i][j].color {
-				currentGroup = append(currentGroup, matrix[i][j])
-			} else {
-				if len(currentGroup) > len(longestGroup) {
-					longestGroup = currentGroup
-					groupType = TypeHorizontal
+			if !visited[point{i, j}] {
+				color := matrix[i][j].color
+				group := bfs(matrix, visited, color, i, j)
+
+				if len(group) > len(longestGroup) {
+					longestGroup = group
 				}
-				currentGroup = []block{matrix[i][j]}
 			}
-		}
-		if len(currentGroup) > len(longestGroup) {
-			longestGroup = currentGroup
-			groupType = TypeHorizontal
 		}
 	}
 
-	// Проверка вертикальных групп
-	for j := range matrix[0] {
-		currentGroup := make([]block, 0)
-		for i := range matrix {
-			if len(currentGroup) == 0 || currentGroup[len(currentGroup)-1].color == matrix[i][j].color {
-				currentGroup = append(currentGroup, matrix[i][j])
-			} else {
-				if len(currentGroup) > len(longestGroup) {
-					longestGroup = currentGroup
-					groupType = TypeVertical
-				}
-				currentGroup = []block{matrix[i][j]}
-			}
+	return longestGroup
+}
+
+func bfs(matrix [][]block, visited map[point]bool, color, row, col int) []block {
+	queue := []point{{row, col}}
+	group := make([]block, 0)
+
+	for len(queue) > 0 {
+		p := queue[0]
+		queue = queue[1:]
+
+		if visited[p] {
+			continue
 		}
-		if len(currentGroup) > len(longestGroup) {
-			longestGroup = currentGroup
-			groupType = TypeVertical
+
+		if matrix[p.row][p.col].color != color {
+			continue
+		}
+
+		group = append(group, matrix[p.row][p.col])
+		visited[p] = true
+
+		if p.row > 0 {
+			queue = append(queue, point{p.row - 1, p.col})
+		}
+		if p.row < len(matrix)-1 {
+			queue = append(queue, point{p.row + 1, p.col})
+		}
+		if p.col > 0 {
+			queue = append(queue, point{p.row, p.col - 1})
+		}
+		if p.col < len(matrix[0])-1 {
+			queue = append(queue, point{p.row, p.col + 1})
 		}
 	}
 
-	return longestGroup, groupType
+	return group
 }

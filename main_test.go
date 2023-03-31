@@ -7,21 +7,46 @@ import (
 )
 
 func TestFindLongestGroup(t *testing.T) {
-	matrix := [][]block{
-		{{0}, {0}, {0}, {0}},
-		{{1}, {0}, {1}, {0}},
-		{{0}, {2}, {1}, {1}},
-		{{0}, {0}, {1}, {0}},
-		{{0}, {2}, {1}, {1}},
-		{{1}, {0}, {1}, {0}},
-		{{1}, {0}, {0}, {0}},
+	matrixTests := []struct {
+		matrix [][]block
+		color  int
+		len    int
+	}{
+		{
+			matrix: [][]block{
+				{{0}, {0}, {0}, {0}},
+				{{1}, {0}, {1}, {0}},
+				{{0}, {2}, {1}, {1}},
+				{{0}, {0}, {1}, {0}},
+				{{0}, {2}, {1}, {1}},
+				{{1}, {0}, {1}, {0}},
+				{{1}, {0}, {0}, {0}},
+			},
+			color: 1,
+			len:   7,
+		},
+		{
+			matrix: [][]block{
+				{{2}, {0}, {0}, {0}},
+				{{2}, {0}, {2}, {0}},
+				{{2}, {2}, {2}, {2}},
+				{{0}, {0}, {4}, {2}},
+				{{0}, {2}, {3}, {2}},
+				{{1}, {1}, {1}, {1}},
+				{{1}, {1}, {1}, {1}},
+			},
+			color: 2,
+			len:   9,
+		},
 	}
-	longestGroup, gtype := findLongestGroup(matrix)
+	for _, test := range matrixTests {
+		longestGroup := findLongestGroup(test.matrix)
 
-	assert := assert.New(t)
-	assert.Equal(TypeVertical, gtype)
-	assert.Equal(1, longestGroup[0].color)
-	assert.Equal(5, len(longestGroup))
+		assert := assert.New(t)
+		assert.Equal(test.color, longestGroup[0].color)
+		assert.Equal(test.len, len(longestGroup))
+
+	}
 }
 
 func BenchmarkFindLongestGroup(b *testing.B) {
